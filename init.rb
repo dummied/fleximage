@@ -1,4 +1,5 @@
 require 'open-uri'
+require 'base64'
 
 # Load RMagick
 begin
@@ -8,13 +9,8 @@ rescue MissingSourceFile => e
   raise e
 end
 
-# Load dsl_accessor
-begin
-  require 'dsl_accessor'
-rescue MissingSourceFile => e
-  puts %{ERROR :: FlexImage requires the dsl_accessor gem.  "gem install dsl_accessor"}
-  raise e
-end
+# Load dsl_accessor from lib
+require 'dsl_accessor'
 
 # Load Operators
 require 'fleximage/operator/base'
@@ -26,8 +22,27 @@ end
 require 'fleximage/model'
 ActiveRecord::Base.class_eval { include Fleximage::Model }
 
+# Image Proxy
+require 'fleximage/image_proxy'
+
 # Setup View
-require 'fleximage/view'
 ActionController::Base.exempt_from_layout :flexi
-ActionView::Base.register_template_handler :flexi, Fleximage::View
+if defined?(ActionView::Template)
+  # Rails >= 2.1
+  require 'fleximage/view'
+  ActionView::Template.register_template_handler :flexi, Fleximage::View
+else
+  # Rails < 2.1
+  require 'fleximage/legacy_view'
+  ActionView::Base.register_template_handler :flexi, Fleximage::LegacyView
+end
+
+# Setup Helper
+require 'fleximage/helper'
+ActionView::Base.class_eval { include Fleximage::Helper }
+
+# Register mime types
+Mime::Type.register_alias "image/pjpeg", :jpg # IE6 sends jpg data as "image/pjpeg".  Silly IE6.
 Mime::Type.register "image/jpeg", :jpg
+Mime::Type.register "image/gif", :gif
+Mime::Type.register "image/png", :png

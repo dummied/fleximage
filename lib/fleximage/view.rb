@@ -1,15 +1,19 @@
 module Fleximage
   
   # Renders a .flexi template
-  class View #:nodoc:
+  class View < ActionView::TemplateHandler #:nodoc:
     class TemplateDidNotReturnImage < RuntimeError #:nodoc:
     end
     
-    def initialize(view)
-      @view = view
+    def self.call(template)
+      "Fleximage::View.new(self).render(template)"
+    end
+
+    def initialize(action_view)
+      @view = action_view
     end
     
-    def render(template, local_assigns = {})
+    def render(template)
       # process the view
       result = @view.instance_eval do
         
@@ -22,34 +26,32 @@ module Fleximage
           end
         end
         
-        # inject assigns into instance variables
-        assigns.each do |key, value|
-          instance_variable_set "@#{key}", value
-          value.load_image if value.respond_to?(:load_image)
-        end
-        
-        # inject local assigns into reader methods
-        local_assigns.each do |key, value|
-          class << self; self; end.send(:define_method, key) { val }
-        end
-        
         #execute the template
-        eval(template)
+        eval(template.source)
       end
       
       # Raise an error if object returned from template is not an image record
       unless result.class.include?(Fleximage::Model::InstanceMethods)
-        raise TemplateDidNotReturnImage, ".flexi template was expected to return a model instance that acts_as_fleximage, but got an instance of <#{result.class}> instead."
+        raise TemplateDidNotReturnImage, 
+                ".flexi template was expected to return a model instance that acts_as_fleximage, but got an instance of <#{result.class}> instead."
       end
       
-      # get rendered result
-      rendered_image = result.output_image
+      # Figure out the proper format
+      requested_format = (@view.params[:format] || :jpg).to_sym
+      unless [:jpg, :gif, :png].include?(requested_format)
+        raise 'Image must be requested with an image type format.  jpg, gif and png only are supported.'
+      end
       
       # Set proper content type
-      @view.controller.headers["Content-Type"] = 'image/jpeg'
+      @view.controller.response.content_type = Mime::Type.lookup_by_extension(requested_format.to_s).to_s
       
-      # Return image data
-      return rendered_image
+      # Set proper caching headers
+      if defined?(Rails) && Rails.env == 'production'
+        @view.controller.response.headers['Cache-Control'] = 'public, max-age=86400'
+      end
+      
+      # return rendered result
+      return result.output_image(:format => requested_format)
     ensure
     
       # ensure garbage collection happens after every flex image render

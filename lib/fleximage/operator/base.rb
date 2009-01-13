@@ -1,6 +1,12 @@
 module Fleximage
   module Operator
     
+    class BadOperatorResult < Exception #:nodoc:
+    end
+    
+    class OperationNotImplemented < Exception #:nodoc:
+    end
+    
     # The Operator::Base class is what all other Operator classes inherit from.
     # To write your own Operator class, simply inherit from this class, and 
     # implement your own operate methods, with your own arguments.  Just 
@@ -11,30 +17,55 @@ module Fleximage
     #
     # * @image : The current image from the model.  Use this is a starting 
     #   point for all transformations.
-    # * @model_object : The model object that this image belongs to.  Use
-    #   its methods if you need to do something specific based on model 
-    #   data.
+    # * @model : The model instance that this image transformation is happenining
+    #   in.  Use it to get data out of your model for display in your image.
     class Base
       # Create a operator, capturing the model object to operate on
-      def initialize(model_object) #:nodoc:
-        @model_object = model_object
+      def initialize(proxy, image, model_obj) #:nodoc:
+        @proxy = proxy
+        @image = image
+        @model = model_obj
       end
       
       # Start the operation
       def execute(*args) #:nodoc:
-        @image = @model_object.load_image
-        @model_object.instance_variable_set "@output_image", operate(*args)
+        # Get the result of the Operators #operate method
+        result = operate(*args)
+        
+        # Ensure that the result is an RMagick:Image object
+        unless result.is_a?(Magick::Image)
+          raise BadOperatorResult, "expected #{self.class}#operate to return an instance of Magick::Image. \n"+
+                                   "Got instance of #{result.class} instead."
+        end
+        
+        # Save the result to the operator proxy
+        @proxy.image = result
       end
       
       # Perform the operation.  Override this method in your Operator::Base subclasses
       # in order to write your own image operators.
       def operate(*args)
-        raise "Override this method in your own subclass."
+        raise OperationNotImplemented, "Override this method in your own subclass."
       end
       
       # ---
       # - SUPPORT METHODS
       # ---
+      
+      # Allows access to size conversion globally.  See size_to_xy for a more detailed explanation
+      def self.size_to_xy(size)
+        case          
+        when size.is_a?(Array) && size.size == 2  # [320, 240]
+          size
+      
+        when size.to_s.include?('x')              # "320x240"
+          size.split('x').collect(&:to_i)
+        
+        else # Anything else, convert the object to an integer and assume square dimensions
+          [size.to_i, size.to_i]
+          
+        end
+      end
       
       # Converts a size object to an [x,y] array.  Acceptible formats are:
       # 
@@ -47,38 +78,32 @@ module Fleximage
       #
       #   x, y = size_to_xy("10x20")
       def size_to_xy(size)
-        if size.is_a?(Array) && size.size == 2
-          size
-        elsif size.to_s.include?('x')
-          size.split('x').collect(&:to_i)
-        else
-          [size.to_i, size.to_i]
-        end
+        self.class.size_to_xy size
       end
       
       # Scale the image, respecting aspect ratio.  
       # Operation will happen in the main <tt>@image</tt> unless you supply the +img+ argument
       # to operate on instead.
-      def scale(size, img = nil)
-        (img || @image).change_geometry!(size_to_xy(size).join('x')) do |cols, rows, img|
+      def scale(size, img = @image)
+        img.change_geometry!(size_to_xy(size).join('x')) do |cols, rows, _img|
           cols = 1 if cols < 1
           rows = 1 if rows < 1
-          img.resize!(cols, rows)
+          _img.resize!(cols, rows)
         end
       end
       
       # Scale to the desired size and crop edges off to get the exact dimensions needed.
       # Operation will happen in the main <tt>@image</tt> unless you supply the +img+ argument
       # to operate on instead.
-      def scale_and_crop(size, img = nil)
-        (img || @image).crop_resized!(*size_to_xy(size))
+      def scale_and_crop(size, img = @image)
+        img.crop_resized!(*size_to_xy(size))
       end
       
       # Resize the image, with no respect to aspect ratio.  
       # Operation will happen in the main <tt>@image</tt> unless you supply the +img+ argument
       # to operate on instead.
-      def stretch(size, img = nil)
-        (img || @image).resize!(*size_to_xy(size))
+      def stretch(size, img = @image)
+        img.resize!(*size_to_xy(size))
       end
       
       # Convert a symbol to an RMagick blending mode.
