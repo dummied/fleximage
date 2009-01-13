@@ -2,7 +2,7 @@
 
 == Overview
 
-Fleximage is a Rails plugin that tried to make image uploading and rendering super easy.
+Fleximage is a Rails plugin that tries to make image uploading and rendering super easy.
 
 There are 2 pieces involved in making Rails image handling easy.
 
@@ -27,7 +27,7 @@ Fleximage uses a simple templating engine that allows you to re-render images ex
 * Does not need to have everything resized on upload allowing your site layout the change later on, and all image will re-render themselves just right with your new rendering templates.
 * Support for special effects like text, image or logo overlays, borders, shadows.
 * Extensible by adding image operator classes which allow for reusable snippets of direct RMagick code.
-* Require absolutely zero controller code.
+* Requires absolutely zero controller code.
 
 
 == Getting Started
@@ -38,7 +38,7 @@ If running on rails edge:
 
   ./script/plugin install git://github.com/Squeegy/fleximage.git
 
-Otherwise, you have to do a manual install since Rails did not yet support git.  Download this file:
+Otherwise, you have to do a manual install since Rails does not yet support git.  Download this file:
 
 http://github.com/Squeegy/fleximage/tarball/master
 
@@ -47,7 +47,7 @@ Unzip, and place the root +fleximage+ folder in your <tt>railsapproot/vendor/plu
 
 === 2. Activating your model
 
-You need to let your model know it should be fleximage friendly.  Lets say you have a model for photos.
+You need to let your model know it should be Fleximage friendly.  Lets say you have a model for photos.
   
   # app/models/photo.rb
   class Photo < ActiveRecord::Base
