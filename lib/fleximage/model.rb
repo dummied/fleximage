@@ -4,7 +4,15 @@ module Fleximage
   module Model
     
     class MasterImageNotFound < RuntimeError #:nodoc:
-    end
+    end        
+                  
+    class RequiredLibraryNotFoundError < StandardError #:nodoc:
+    end         
+    
+    class ConfigFileNotFoundError < StandardError #:nodoc:
+    end       
+    
+    
     
     # Include acts_as_fleximage class method
     def self.included(base) #:nodoc:
@@ -90,6 +98,10 @@ module Fleximage
             col.name == 'image_file_data'
           end
         end
+         
+        def self.s3_store?
+          s3
+        end
         
         def self.has_store?
           db_store? || image_directory
@@ -106,7 +118,13 @@ module Fleximage
         attr_accessor :jpg_compression_quality
         
         # Where images get stored
-        dsl_accessor :image_directory
+        dsl_accessor :image_directory  
+        
+        # Are we using Amazon s3?
+        dsl_accessor :s3
+        
+        # Do we want to save everything to s3 or just the master images?
+        # dsl_accessor :s3_master_only
         
         # Put uploads from different days into different subdirectories
         dsl_accessor :use_creation_date_based_directories, :default => true
@@ -135,7 +153,9 @@ module Fleximage
         # A block that processes an image before it gets saved as the master image of a record.
         # Can be helpful to resize potentially huge images to something more manageable. Set via
         # the "preprocess_image { |image| ... }" class method.
-        dsl_accessor :preprocess_image_operation
+        dsl_accessor :preprocess_image_operation   
+        
+        
         
         # Image related save and destroy callbacks
         after_destroy :delete_image_file
@@ -146,12 +166,38 @@ module Fleximage
         yield if block_given?
         
         # set the image directory from passed options
-        image_directory options[:image_directory] if options[:image_directory]
+        image_directory options[:image_directory] if options[:image_directory]  
+        
+        s3 options[:s3] if options[:s3]  
+        
+        def s3_options
+          begin
+            @@s3_config_path = RAILS_ROOT + '/config/amazon_s3.yml'
+            @@s3_config = @@s3_config = YAML.load(ERB.new(File.read(@@s3_config_path)).result)[RAILS_ENV].symbolize_keys
+          rescue
+           raise ConfigFileNotFoundError.new('File %s not found' % @@s3_config_path)  
+          end
+        end
+        
+        if s3
+          begin
+            require 'aws/s3'
+            include AWS::S3
+          rescue LoadError
+            raise RequiredLibraryNotFoundError.new('AWS::S3 could not be loaded')
+          end  
+          
+          @@bucket_name = s3_options[:bucket_name]
+
+          AWS::S3::Base.establish_connection!(s3_options.slice(:access_key_id, :secret_access_key, :server, :port, :use_ssl, :persistent, :proxy))
+                    
+        end
         
         # Require the declaration of a master image storage directory
-        if !image_directory && !db_store? && !default_image && !default_image_path
+        if !image_directory && !db_store? && !default_image && !default_image_path && !s3
           raise "No place to put images!  Declare this via the :image_directory => 'path/to/directory' option\n"+
-                "Or add a database column named image_file_data for DB storage"
+                "Or add a database column named image_file_data for DB storage\n"+
+                "Or fill out config/amazon_s3 and declare via :s3 => true"
         end
       end
     end
@@ -168,11 +214,25 @@ module Fleximage
       # limit on the number files in a directory.
       #
       #   @some_image.directory_path #=> /var/www/myapp/uploaded_images/2008/3/30
-      def directory_path
-        raise 'No image directory was defined, cannot generate path' unless self.class.image_directory
+      def directory_path(with_url=true)
+        raise 'No image directory was defined, cannot generate path' unless (self.class.image_directory || self.class.s3_store?)
         
-        # base directory
-        directory = "#{RAILS_ROOT}/#{self.class.image_directory}"
+        # base directory 
+        if self.class.s3_store? && with_url
+          if self.class.image_directory.blank? 
+            directory = File.join(protocol + hostname + port_string, bucket_name, "/#{self.class.image_directory}")
+          else 
+            directory = File.join(protocol + hostname + port_string, bucket_name)
+          end
+        elsif self.class.s3_store? && !with_url
+          if self.class.image_directory.blank? 
+            directory = "/#{self.class.image_directory}"
+          else 
+            directory = ""
+          end
+        else   
+          directory = "#{RAILS_ROOT}/#{self.class.image_directory}"
+        end
         
         # specific creation date based directory suffix.
         creation = self[:created_at] || self[:created_on]
@@ -181,13 +241,34 @@ module Fleximage
         else
           directory
         end
+      end 
+      
+      def s3_config
+        self.class.s3_options
+      end   
+      
+      
+      def protocol
+        @protocol ||= s3_config[:use_ssl] ? 'https://' : 'http://'
+      end
+      
+      def hostname
+        @hostname ||= s3_config[:server] || AWS::S3::DEFAULT_HOST
+      end
+      
+      def port_string
+        @port_string ||= (s3_config[:port].nil? || s3_config[:port] == (s3_config[:use_ssl] ? 443 : 80)) ? '' : ":#{s3_config[:port]}"
+      end  
+      
+      def bucket_name
+        @bucket_name ||= s3_config[:bucket_name] 
       end
       
       # Returns the path to the master image file for this record.
       #   
       #   @some_image.file_path #=> /var/www/myapp/uploaded_images/123.png
-      def file_path
-        "#{directory_path}/#{id}.#{self.class.image_storage_format}"
+      def file_path(with_url=true) 
+        "#{directory_path(with_url)}/#{id}.#{self.class.image_storage_format}"
       end
       
       # Sets the image file for this record to an uploaded file.  This can 
@@ -330,7 +411,7 @@ module Fleximage
         end
       end
       
-      # Load the image from disk/DB, or return the cached and potentially 
+      # Load the image from disk/DB/s3, or return the cached and potentially 
       # processed output image.
       def load_image #:nodoc:
         @output_image ||= @uploaded_image
@@ -347,6 +428,8 @@ module Fleximage
             else
               master_image_not_found
             end
+          elsif self.class.s3_store?
+            @output_image = Magick::Image.read(open(file_path).path).first
           else
             # Load the image from the disk
             @output_image = Magick::Image.read(file_path).first
@@ -369,7 +452,7 @@ module Fleximage
         format = (options[:format] || :jpg).to_s.upcase
         @output_image.format = format
         @output_image.strip!
-        if format = 'JPG'
+        if format == 'JPG'
           quality = @jpg_compression_quality || self.class.output_image_jpg_quality
           @output_image.to_blob { self.quality = quality }
         else
@@ -386,6 +469,8 @@ module Fleximage
         
         if self.class.db_store?
           update_attribute :image_file_data, nil unless frozen?
+        elsif self.class.s3_store?
+          AWS::S3::S3Object.delete "/#{self.class.image_directory}/#{creation.year}/#{creation.month}/#{creation.day}/#{id}.#{self.class.image_storage_format}", bucket_name
         else
           File.delete(file_path) if File.exists?(file_path)
         end
@@ -425,12 +510,28 @@ module Fleximage
         
         # Write image to file system and cleanup garbage.
         def post_save
-          if @uploaded_image && !self.class.db_store?
+          if @uploaded_image && !self.class.db_store? && !self.class.s3_store?
             # Make sure target directory exists
             FileUtils.mkdir_p(directory_path)
           
             # Write master image file
-            @uploaded_image.write(file_path)
+            @uploaded_image.write(file_path)  
+          elsif @uploaded_image && !self.class.db_store? && self.class.s3_store?
+
+            
+            begin
+              AWS::S3::Bucket.find(bucket_name)
+            rescue
+              AWS::S3::Bucket.create(bucket_name)
+            end                 
+            
+             AWS::S3::S3Object.store(
+                file_path(false),
+                @uploaded_image.to_blob,
+                bucket_name,
+                :access => :public_read
+             )
+            
           end
           
           # Cleanup temp files
