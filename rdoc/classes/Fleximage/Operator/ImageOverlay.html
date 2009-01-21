@@ -159,7 +159,7 @@ Example:
       <h3 class="section-bar">Methods</h3>
 
       <div class="name-list">
-      <a href="#M000015">operate</a>&nbsp;&nbsp;
+      <a href="#M000145">operate</a>&nbsp;&nbsp;
       </div>
     </div>
 
@@ -181,53 +181,17 @@ Example:
     <div id="methods">
       <h3 class="section-bar">Public Instance methods</h3>
 
-      <div id="method-M000015" class="method-detail">
-        <a name="M000015"></a>
+      <div id="method-M000145" class="method-detail">
+        <a name="M000145"></a>
 
         <div class="method-heading">
-          <a href="#M000015" class="method-signature">
+          <a href="ImageOverlay.src/M000145.html" target="Code" class="method-signature"
+            onclick="popupCode('ImageOverlay.src/M000145.html');return false;">
           <span class="method-name">operate</span><span class="method-args">(image_overlay_path, options = {})</span>
           </a>
         </div>
       
         <div class="method-description">
-          <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000015-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000015-source">
-<pre>
-    <span class="ruby-comment cmt"># File lib/fleximage/operator/image_overlay.rb, line 52</span>
-52:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">operate</span>(<span class="ruby-identifier">image_overlay_path</span>, <span class="ruby-identifier">options</span> = {})
-53:         <span class="ruby-identifier">options</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">symbolize_keys</span>
-54:       
-55:         <span class="ruby-comment cmt">#load overlay</span>
-56:         <span class="ruby-identifier">overlay</span> = <span class="ruby-constant">Magick</span><span class="ruby-operator">::</span><span class="ruby-constant">Image</span>.<span class="ruby-identifier">read</span>(<span class="ruby-identifier">image_overlay_path</span>).<span class="ruby-identifier">first</span>
-57:       
-58:         <span class="ruby-comment cmt">#resize overlay</span>
-59:         <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:size</span>]
-60:           <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:size</span>] <span class="ruby-operator">==</span> <span class="ruby-identifier">:scale_to_fit</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:size</span>] <span class="ruby-operator">==</span> <span class="ruby-identifier">:stretch_to_fit</span>
-61:             <span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span> = <span class="ruby-ivar">@image</span>.<span class="ruby-identifier">columns</span>, <span class="ruby-ivar">@image</span>.<span class="ruby-identifier">rows</span>
-62:           <span class="ruby-keyword kw">else</span>
-63:             <span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span> = <span class="ruby-identifier">size_to_xy</span>(<span class="ruby-identifier">options</span>[<span class="ruby-identifier">:size</span>])
-64:           <span class="ruby-keyword kw">end</span>
-65:         
-66:           <span class="ruby-identifier">method</span> = <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:size</span>] <span class="ruby-operator">==</span> <span class="ruby-identifier">:stretch_to_fit</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">:stretch</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">:scale</span>
-67:           <span class="ruby-identifier">send</span>(<span class="ruby-identifier">method</span>, [<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>], <span class="ruby-identifier">overlay</span>)
-68:         <span class="ruby-keyword kw">end</span>
-69:       
-70:         <span class="ruby-comment cmt">#prepare arguments for composite!</span>
-71:         <span class="ruby-identifier">args</span> = []
-72:         <span class="ruby-identifier">args</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">overlay</span>                                               <span class="ruby-comment cmt">#overlay image</span>
-73:         <span class="ruby-identifier">args</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">GRAVITIES</span>[<span class="ruby-identifier">options</span>[<span class="ruby-identifier">:alignment</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">:center</span>]             <span class="ruby-comment cmt">#gravity</span>
-74:         <span class="ruby-identifier">args</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">size_to_xy</span>(<span class="ruby-identifier">options</span>[<span class="ruby-identifier">:offset</span>]) <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:offset</span>]      <span class="ruby-comment cmt">#offset</span>
-75:         <span class="ruby-identifier">args</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">symbol_to_blending_mode</span>(<span class="ruby-identifier">options</span>[<span class="ruby-identifier">:blending</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">:over</span>)  <span class="ruby-comment cmt">#compositing mode</span>
-76:         
-77:         <span class="ruby-comment cmt">#composite</span>
-78:         <span class="ruby-ivar">@image</span>.<span class="ruby-identifier">composite!</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
-79:       
-80:         <span class="ruby-keyword kw">return</span> <span class="ruby-ivar">@image</span>
-81:       <span class="ruby-keyword kw">end</span>
-</pre>
-          </div>
         </div>
       </div>
 

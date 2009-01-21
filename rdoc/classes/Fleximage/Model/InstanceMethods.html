@@ -86,14 +86,20 @@ Provides methods that every model instance that acts_as_fleximage needs.
       <h3 class="section-bar">Methods</h3>
 
       <div class="name-list">
-      <a href="#M000011">delete_image_file</a>&nbsp;&nbsp;
-      <a href="#M000004">directory_path</a>&nbsp;&nbsp;
-      <a href="#M000005">file_path</a>&nbsp;&nbsp;
-      <a href="#M000009">has_image?</a>&nbsp;&nbsp;
-      <a href="#M000006">image_file=</a>&nbsp;&nbsp;
-      <a href="#M000008">image_file_url</a>&nbsp;&nbsp;
-      <a href="#M000007">image_file_url=</a>&nbsp;&nbsp;
-      <a href="#M000010">operate</a>&nbsp;&nbsp;
+      <a href="#M000131">bucket_name</a>&nbsp;&nbsp;
+      <a href="#M000140">delete_image_file</a>&nbsp;&nbsp;
+      <a href="#M000127">directory_path</a>&nbsp;&nbsp;
+      <a href="#M000132">file_path</a>&nbsp;&nbsp;
+      <a href="#M000137">has_image?</a>&nbsp;&nbsp;
+      <a href="#M000138">has_saved_image?</a>&nbsp;&nbsp;
+      <a href="#M000129">hostname</a>&nbsp;&nbsp;
+      <a href="#M000133">image_file=</a>&nbsp;&nbsp;
+      <a href="#M000135">image_file_temp=</a>&nbsp;&nbsp;
+      <a href="#M000136">image_file_url</a>&nbsp;&nbsp;
+      <a href="#M000134">image_file_url=</a>&nbsp;&nbsp;
+      <a href="#M000139">operate</a>&nbsp;&nbsp;
+      <a href="#M000130">port_string</a>&nbsp;&nbsp;
+      <a href="#M000128">protocol</a>&nbsp;&nbsp;
       </div>
     </div>
 
@@ -115,11 +121,30 @@ Provides methods that every model instance that acts_as_fleximage needs.
     <div id="methods">
       <h3 class="section-bar">Public Instance methods</h3>
 
-      <div id="method-M000011" class="method-detail">
-        <a name="M000011"></a>
+      <div id="method-M000131" class="method-detail">
+        <a name="M000131"></a>
 
         <div class="method-heading">
-          <a href="#M000011" class="method-signature">
+          <a href="InstanceMethods.src/M000131.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000131.html');return false;">
+          <span class="method-name">bucket_name</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Last of the little helper methods that just translates your config options.
+In this case, it returns the bucket name you&#8216;re wanting to use.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000140" class="method-detail">
+        <a name="M000140"></a>
+
+        <div class="method-heading">
+          <a href="InstanceMethods.src/M000140.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000140.html');return false;">
           <span class="method-name">delete_image_file</span><span class="method-args">()</span>
           </a>
         </div>
@@ -130,34 +155,27 @@ Delete the image file for this record. This is automatically ran after this
 record gets destroyed, but you can call it manually if you want to remove
 the image from the record.
 </p>
-          <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000011-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000011-source">
-<pre>
-     <span class="ruby-comment cmt"># File lib/fleximage/model.rb, line 327</span>
-327:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">delete_image_file</span>
-328:         <span class="ruby-constant">File</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">file_path</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-identifier">file_path</span>)
-329:       <span class="ruby-keyword kw">end</span>
-</pre>
-          </div>
         </div>
       </div>
 
-      <div id="method-M000004" class="method-detail">
-        <a name="M000004"></a>
+      <div id="method-M000127" class="method-detail">
+        <a name="M000127"></a>
 
         <div class="method-heading">
-          <a href="#M000004" class="method-signature">
-          <span class="method-name">directory_path</span><span class="method-args">()</span>
+          <a href="InstanceMethods.src/M000127.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000127.html');return false;">
+          <span class="method-name">directory_path</span><span class="method-args">(with_url=true)</span>
           </a>
         </div>
       
         <div class="method-description">
           <p>
-Returns the path to the master image file for this record.
+Returns the path to the master image file for this record. For Amazon S3
+backend images, it will return the start of the url
 </p>
 <pre>
   @some_image.directory_path #=&gt; /var/www/myapp/uploaded_images
+  @some_s3_image.directory_path #=&gt; http://s3.amazon.com/my_bucket/photo
 </pre>
 <p>
 If this model has a created_at field, it will use a directory structure
@@ -166,37 +184,18 @@ number files in a directory.
 </p>
 <pre>
   @some_image.directory_path #=&gt; /var/www/myapp/uploaded_images/2008/3/30
+  @some_s3_image.directory_path #=&gt; http://s3.amazon.com/my_bucket/photo/2009/1/16
 </pre>
-          <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000004-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000004-source">
-<pre>
-     <span class="ruby-comment cmt"># File lib/fleximage/model.rb, line 152</span>
-152:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">directory_path</span>
-153:         <span class="ruby-identifier">raise</span> <span class="ruby-value str">'No image directory was defined, cannot generate path'</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">image_directory</span>
-154:         
-155:         <span class="ruby-comment cmt"># base directory</span>
-156:         <span class="ruby-identifier">directory</span> = <span class="ruby-node">&quot;#{RAILS_ROOT}/#{self.class.image_directory}&quot;</span>
-157:         
-158:         <span class="ruby-comment cmt"># specific creation date based directory suffix.</span>
-159:         <span class="ruby-identifier">creation</span> = <span class="ruby-keyword kw">self</span>[<span class="ruby-identifier">:created_at</span>] <span class="ruby-operator">||</span> <span class="ruby-keyword kw">self</span>[<span class="ruby-identifier">:created_on</span>]
-160:         <span class="ruby-keyword kw">if</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">use_creation_date_based_directories</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">creation</span> 
-161:           <span class="ruby-node">&quot;#{directory}/#{creation.year}/#{creation.month}/#{creation.day}&quot;</span>
-162:         <span class="ruby-keyword kw">else</span>
-163:           <span class="ruby-identifier">directory</span>
-164:         <span class="ruby-keyword kw">end</span>
-165:       <span class="ruby-keyword kw">end</span>
-</pre>
-          </div>
         </div>
       </div>
 
-      <div id="method-M000005" class="method-detail">
-        <a name="M000005"></a>
+      <div id="method-M000132" class="method-detail">
+        <a name="M000132"></a>
 
         <div class="method-heading">
-          <a href="#M000005" class="method-signature">
-          <span class="method-name">file_path</span><span class="method-args">()</span>
+          <a href="InstanceMethods.src/M000132.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000132.html');return false;">
+          <span class="method-name">file_path</span><span class="method-args">(with_url=true)</span>
           </a>
         </div>
       
@@ -206,25 +205,17 @@ Returns the path to the master image file for this record.
 </p>
 <pre>
   @some_image.file_path #=&gt; /var/www/myapp/uploaded_images/123.png
+  @some_s3_image.file_path #=&gt; http://s3.amazon.com/my_bucket/photo/123.png
 </pre>
-          <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000005-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000005-source">
-<pre>
-     <span class="ruby-comment cmt"># File lib/fleximage/model.rb, line 170</span>
-170:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">file_path</span>
-171:         <span class="ruby-node">&quot;#{directory_path}/#{id}.#{self.class.image_storage_format}&quot;</span>
-172:       <span class="ruby-keyword kw">end</span>
-</pre>
-          </div>
         </div>
       </div>
 
-      <div id="method-M000009" class="method-detail">
-        <a name="M000009"></a>
+      <div id="method-M000137" class="method-detail">
+        <a name="M000137"></a>
 
         <div class="method-heading">
-          <a href="#M000009" class="method-signature">
+          <a href="InstanceMethods.src/M000137.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000137.html');return false;">
           <span class="method-name">has_image?</span><span class="method-args">()</span>
           </a>
         </div>
@@ -233,24 +224,47 @@ Returns the path to the master image file for this record.
           <p>
 Return true if this record has an image.
 </p>
-          <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000009-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000009-source">
-<pre>
-     <span class="ruby-comment cmt"># File lib/fleximage/model.rb, line 264</span>
-264:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">has_image?</span>
-265:         <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">db_store?</span> <span class="ruby-value">? </span><span class="ruby-identifier">image_file_data</span> <span class="ruby-operator">:</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-identifier">file_path</span>)
-266:       <span class="ruby-keyword kw">end</span>
-</pre>
-          </div>
         </div>
       </div>
 
-      <div id="method-M000006" class="method-detail">
-        <a name="M000006"></a>
+      <div id="method-M000138" class="method-detail">
+        <a name="M000138"></a>
 
         <div class="method-heading">
-          <a href="#M000006" class="method-signature">
+          <a href="InstanceMethods.src/M000138.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000138.html');return false;">
+          <span class="method-name">has_saved_image?</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+        </div>
+      </div>
+
+      <div id="method-M000129" class="method-detail">
+        <a name="M000129"></a>
+
+        <div class="method-heading">
+          <a href="InstanceMethods.src/M000129.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000129.html');return false;">
+          <span class="method-name">hostname</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Returns the <a href="InstanceMethods.html#M000129">hostname</a> for Amazon
+S3 calls.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000133" class="method-detail">
+        <a name="M000133"></a>
+
+        <div class="method-heading">
+          <a href="InstanceMethods.src/M000133.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000133.html');return false;">
           <span class="method-name">image_file=</span><span class="method-args">(file)</span>
           </a>
         </div>
@@ -261,8 +275,8 @@ Sets the image file for this record to an uploaded file. This can be called
 directly, or passively like from an ActiveRecord mass assignment.
 </p>
 <p>
-Rails will automatically call this method for you, in most of the
-situations you would expect it to.
+<a href="../../Rails.html">Rails</a> will automatically call this method
+for you, in most of the situations you would expect it to.
 </p>
 <pre>
   # via mass assignment, the most common form you'll probably use
@@ -281,79 +295,53 @@ situations you would expect it to.
   p = Product.find(1)
   p.images.create(params[:photo])
 </pre>
-          <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000006-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000006-source">
-<pre>
-     <span class="ruby-comment cmt"># File lib/fleximage/model.rb, line 196</span>
-196:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">image_file=</span>(<span class="ruby-identifier">file</span>)
-197:         <span class="ruby-comment cmt"># Get the size of the file.  file.size works for form-uploaded images, file.stat.size works</span>
-198:         <span class="ruby-comment cmt"># for file object created by File.open('foo.jpg', 'rb')</span>
-199:         <span class="ruby-identifier">file_size</span> = <span class="ruby-identifier">file</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-identifier">:size</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">file</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">file</span>.<span class="ruby-identifier">stat</span>.<span class="ruby-identifier">size</span>
-200:         
-201:         <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">file</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-identifier">:read</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">file_size</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
-202:           <span class="ruby-comment cmt"># Create RMagick Image object from uploaded file</span>
-203:           <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">file</span>.<span class="ruby-identifier">path</span>
-204:             <span class="ruby-ivar">@uploaded_image</span> = <span class="ruby-constant">Magick</span><span class="ruby-operator">::</span><span class="ruby-constant">Image</span>.<span class="ruby-identifier">read</span>(<span class="ruby-identifier">file</span>.<span class="ruby-identifier">path</span>).<span class="ruby-identifier">first</span>
-205:           <span class="ruby-keyword kw">else</span>
-206:             <span class="ruby-ivar">@uploaded_image</span> = <span class="ruby-constant">Magick</span><span class="ruby-operator">::</span><span class="ruby-constant">Image</span>.<span class="ruby-identifier">from_blob</span>(<span class="ruby-identifier">file</span>.<span class="ruby-identifier">read</span>).<span class="ruby-identifier">first</span>
-207:           <span class="ruby-keyword kw">end</span>
-208:           
-209:           <span class="ruby-identifier">set_magic_attributes</span>(<span class="ruby-identifier">file</span>)
-210:           
-211:           <span class="ruby-comment cmt"># Success, make sure everything is valid</span>
-212:           <span class="ruby-ivar">@missing_image</span> = <span class="ruby-keyword kw">false</span>
-213:           <span class="ruby-ivar">@invalid_image</span> = <span class="ruby-keyword kw">false</span>
-214:         <span class="ruby-keyword kw">else</span>
-215:           <span class="ruby-keyword kw">if</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">require_image</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@uploaded_image</span>
-216:             <span class="ruby-ivar">@missing_image</span> = <span class="ruby-keyword kw">true</span>
-217:           <span class="ruby-keyword kw">end</span>
-218:         <span class="ruby-keyword kw">end</span>
-219:       <span class="ruby-keyword kw">rescue</span> <span class="ruby-constant">Magick</span><span class="ruby-operator">::</span><span class="ruby-constant">ImageMagickError</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
-220:         <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">e</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp re">/no decode delegate for this image format/</span>
-221:           <span class="ruby-ivar">@invalid_image</span> = <span class="ruby-keyword kw">true</span>
-222:         <span class="ruby-keyword kw">else</span>
-223:           <span class="ruby-identifier">raise</span> <span class="ruby-identifier">e</span>
-224:         <span class="ruby-keyword kw">end</span>
-225:       <span class="ruby-keyword kw">end</span>
-</pre>
-          </div>
         </div>
       </div>
 
-      <div id="method-M000008" class="method-detail">
-        <a name="M000008"></a>
+      <div id="method-M000135" class="method-detail">
+        <a name="M000135"></a>
 
         <div class="method-heading">
-          <a href="#M000008" class="method-signature">
+          <a href="InstanceMethods.src/M000135.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000135.html');return false;">
+          <span class="method-name">image_file_temp=</span><span class="method-args">(file_name)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Sets the uploaded image to the name of a file in RAILS_ROOT/tmp that was
+just uploaded. Use as a hidden field in your forms to keep an uploaded
+image when validation fails and the form needs to be redisplayed
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000136" class="method-detail">
+        <a name="M000136"></a>
+
+        <div class="method-heading">
+          <a href="InstanceMethods.src/M000136.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000136.html');return false;">
           <span class="method-name">image_file_url</span><span class="method-args">()</span>
           </a>
         </div>
       
         <div class="method-description">
           <p>
-Return the @<a href="InstanceMethods.html#M000008">image_file_url</a> that
+Return the @<a href="InstanceMethods.html#M000136">image_file_url</a> that
 was previously assigned. This is not saved in the database, and only exists
 to make forms happy.
 </p>
-          <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000008-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000008-source">
-<pre>
-     <span class="ruby-comment cmt"># File lib/fleximage/model.rb, line 259</span>
-259:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">image_file_url</span>
-260:         <span class="ruby-ivar">@image_file_url</span>
-261:       <span class="ruby-keyword kw">end</span>
-</pre>
-          </div>
         </div>
       </div>
 
-      <div id="method-M000007" class="method-detail">
-        <a name="M000007"></a>
+      <div id="method-M000134" class="method-detail">
+        <a name="M000134"></a>
 
         <div class="method-heading">
-          <a href="#M000007" class="method-signature">
+          <a href="InstanceMethods.src/M000134.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000134.html');return false;">
           <span class="method-name">image_file_url=</span><span class="method-args">(file_url)</span>
           </a>
         </div>
@@ -369,36 +357,15 @@ machine, or pull from the internet.
 <pre>
   @photo.image_file_url = 'http://foo.com/bar.jpg'
 </pre>
-          <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000007-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000007-source">
-<pre>
-     <span class="ruby-comment cmt"># File lib/fleximage/model.rb, line 234</span>
-234:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">image_file_url=</span>(<span class="ruby-identifier">file_url</span>)
-235:         <span class="ruby-ivar">@image_file_url</span> = <span class="ruby-identifier">file_url</span>
-236:         <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">file_url</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp re">%r{^https?://}</span>
-237:           <span class="ruby-identifier">file</span> = <span class="ruby-identifier">open</span>(<span class="ruby-identifier">file_url</span>)
-238:           
-239:           <span class="ruby-comment cmt"># Force a URL based file to have an original_filename</span>
-240:           <span class="ruby-identifier">eval</span> <span class="ruby-value str">&quot;class &lt;&lt; file\ndef original_filename\n\&quot;\#{file_url}\&quot;\nend\nend\n&quot;</span>
-241:           
-242:           <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">image_file</span> = <span class="ruby-identifier">file</span>
-243:         <span class="ruby-keyword kw">elsif</span> <span class="ruby-identifier">file_url</span>.<span class="ruby-identifier">empty?</span>
-244:           <span class="ruby-ivar">@missing_image</span> = <span class="ruby-keyword kw">true</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-ivar">@uploaded_image</span>
-245:         <span class="ruby-keyword kw">else</span>
-246:           <span class="ruby-ivar">@invalid_image</span> = <span class="ruby-keyword kw">true</span>
-247:         <span class="ruby-keyword kw">end</span>
-248:       <span class="ruby-keyword kw">end</span>
-</pre>
-          </div>
         </div>
       </div>
 
-      <div id="method-M000010" class="method-detail">
-        <a name="M000010"></a>
+      <div id="method-M000139" class="method-detail">
+        <a name="M000139"></a>
 
         <div class="method-heading">
-          <a href="#M000010" class="method-signature">
+          <a href="InstanceMethods.src/M000139.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000139.html');return false;">
           <span class="method-name">operate</span><span class="method-args">(&amp;block)</span>
           </a>
         </div>
@@ -416,20 +383,41 @@ code inside a block passed to this method.
     image.resize '320x240'
   end
 </pre>
-          <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000010-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000010-source">
-<pre>
-     <span class="ruby-comment cmt"># File lib/fleximage/model.rb, line 277</span>
-277:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">operate</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
-278:         <span class="ruby-identifier">returning</span> <span class="ruby-keyword kw">self</span> <span class="ruby-keyword kw">do</span>
-279:           <span class="ruby-identifier">proxy</span> = <span class="ruby-constant">ImageProxy</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">load_image</span>, <span class="ruby-keyword kw">self</span>)
-280:           <span class="ruby-identifier">block</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">proxy</span>)
-281:           <span class="ruby-ivar">@output_image</span> = <span class="ruby-identifier">proxy</span>.<span class="ruby-identifier">image</span>
-282:         <span class="ruby-keyword kw">end</span>
-283:       <span class="ruby-keyword kw">end</span>
-</pre>
-          </div>
+        </div>
+      </div>
+
+      <div id="method-M000130" class="method-detail">
+        <a name="M000130"></a>
+
+        <div class="method-heading">
+          <a href="InstanceMethods.src/M000130.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000130.html');return false;">
+          <span class="method-name">port_string</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Returns the port string for Amazon S3 calls.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000128" class="method-detail">
+        <a name="M000128"></a>
+
+        <div class="method-heading">
+          <a href="InstanceMethods.src/M000128.html" target="Code" class="method-signature"
+            onclick="popupCode('InstanceMethods.src/M000128.html');return false;">
+          <span class="method-name">protocol</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Returns the <a href="InstanceMethods.html#M000128">protocol</a> for Amazon
+S3 calls.
+</p>
         </div>
       </div>
 

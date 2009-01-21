@@ -142,7 +142,7 @@ Example:
       <h3 class="section-bar">Methods</h3>
 
       <div class="name-list">
-      <a href="#M000025">operate</a>&nbsp;&nbsp;
+      <a href="#M000156">operate</a>&nbsp;&nbsp;
       </div>
     </div>
 
@@ -164,73 +164,17 @@ Example:
     <div id="methods">
       <h3 class="section-bar">Public Instance methods</h3>
 
-      <div id="method-M000025" class="method-detail">
-        <a name="M000025"></a>
+      <div id="method-M000156" class="method-detail">
+        <a name="M000156"></a>
 
         <div class="method-heading">
-          <a href="#M000025" class="method-signature">
+          <a href="Resize.src/M000156.html" target="Code" class="method-signature"
+            onclick="popupCode('Resize.src/M000156.html');return false;">
           <span class="method-name">operate</span><span class="method-args">(size, options = {})</span>
           </a>
         </div>
       
         <div class="method-description">
-          <p><a class="source-toggle" href="#"
-            onclick="toggleCode('M000025-source');return false;">[Source]</a></p>
-          <div class="method-source-code" id="M000025-source">
-<pre>
-    <span class="ruby-comment cmt"># File lib/fleximage/operator/resize.rb, line 39</span>
-39:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">operate</span>(<span class="ruby-identifier">size</span>, <span class="ruby-identifier">options</span> = {})
-40:         <span class="ruby-identifier">options</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">symbolize_keys</span>
-41:         
-42:         <span class="ruby-comment cmt"># Find dimensions</span>
-43:         <span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span> = <span class="ruby-identifier">size_to_xy</span>(<span class="ruby-identifier">size</span>)
-44: 
-45:         <span class="ruby-comment cmt"># prevent upscaling unless :usample param exists.</span>
-46:         <span class="ruby-keyword kw">unless</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:upsample</span>]
-47:           <span class="ruby-identifier">x</span> = <span class="ruby-ivar">@image</span>.<span class="ruby-identifier">columns</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">x</span> <span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@image</span>.<span class="ruby-identifier">columns</span>
-48:           <span class="ruby-identifier">y</span> = <span class="ruby-ivar">@image</span>.<span class="ruby-identifier">rows</span>    <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">y</span> <span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@image</span>.<span class="ruby-identifier">rows</span>
-49:         <span class="ruby-keyword kw">end</span>
-50: 
-51:         <span class="ruby-comment cmt"># Perform image resize</span>
-52:         <span class="ruby-keyword kw">case</span>
-53:         <span class="ruby-keyword kw">when</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:crop</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">options</span>[<span class="ruby-identifier">:crop</span>].<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@image</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-identifier">:crop_resized!</span>)
-54:           <span class="ruby-comment cmt"># perform resize and crop</span>
-55:           <span class="ruby-identifier">scale_and_crop</span>([<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>])
-56: 
-57:         <span class="ruby-keyword kw">when</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:stretch</span>]
-58:           <span class="ruby-comment cmt"># stretch the image, ignoring aspect ratio</span>
-59:           <span class="ruby-identifier">stretch</span>([<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>])
-60: 
-61:         <span class="ruby-keyword kw">else</span>
-62:           <span class="ruby-comment cmt"># perform the resize without crop</span>
-63:           <span class="ruby-identifier">scale</span>([<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>])
-64: 
-65:         <span class="ruby-keyword kw">end</span>
-66: 
-67:         <span class="ruby-comment cmt"># apply padding if necesary</span>
-68:         <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">padding_color</span> = <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:padding</span>]
-69:           <span class="ruby-comment cmt"># get color</span>
-70:           <span class="ruby-identifier">padding_color</span> = <span class="ruby-value str">'white'</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">padding_color</span> <span class="ruby-operator">==</span> <span class="ruby-keyword kw">true</span>
-71: 
-72:           <span class="ruby-comment cmt"># get original x and y.  This makes it play nice if the requested size is larger </span>
-73:           <span class="ruby-comment cmt"># than the image and upsampling is not allowed.</span>
-74:           <span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span> = <span class="ruby-identifier">size_to_xy</span>(<span class="ruby-identifier">size</span>)
-75: 
-76:           <span class="ruby-comment cmt"># get proper border sizes</span>
-77:           <span class="ruby-identifier">x_border</span> = [<span class="ruby-value">0</span>, (<span class="ruby-identifier">x</span> <span class="ruby-operator">-</span> <span class="ruby-ivar">@image</span>.<span class="ruby-identifier">columns</span> <span class="ruby-operator">+</span> <span class="ruby-value">1</span>) <span class="ruby-operator">/</span> <span class="ruby-value">2</span>].<span class="ruby-identifier">max</span>
-78:           <span class="ruby-identifier">y_border</span> = [<span class="ruby-value">0</span>, (<span class="ruby-identifier">y</span> <span class="ruby-operator">-</span> <span class="ruby-ivar">@image</span>.<span class="ruby-identifier">rows</span>    <span class="ruby-operator">+</span> <span class="ruby-value">1</span>) <span class="ruby-operator">/</span> <span class="ruby-value">2</span>].<span class="ruby-identifier">max</span>
-79: 
-80:           <span class="ruby-comment cmt"># apply padding</span>
-81:           <span class="ruby-ivar">@image</span>.<span class="ruby-identifier">border!</span>(<span class="ruby-identifier">x_border</span>, <span class="ruby-identifier">y_border</span>, <span class="ruby-identifier">padding_color</span>)
-82: 
-83:           <span class="ruby-comment cmt"># crop to remove possible extra pixel</span>
-84:           <span class="ruby-ivar">@image</span>.<span class="ruby-identifier">crop!</span>(<span class="ruby-value">0</span>, <span class="ruby-value">0</span>, <span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>, <span class="ruby-keyword kw">true</span>)
-85:         <span class="ruby-keyword kw">end</span>
-86:         
-87:         <span class="ruby-keyword kw">return</span> <span class="ruby-ivar">@image</span>
-88:       <span class="ruby-keyword kw">end</span>
-</pre>
-          </div>
         </div>
       </div>
 
