@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>operate (Fleximage::Operator::Crop)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/fleximage/operator/crop.rb, line 25</span>
+      <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">operate</span>(<span class="ruby-identifier">options</span> = {})
+        <span class="ruby-identifier">options</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">symbolize_keys</span>
+
+        <span class="ruby-comment cmt"># required integer keys</span>
+        [<span class="ruby-identifier">:from</span>, <span class="ruby-identifier">:size</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-node">&quot;:#{key} must be included in crop options&quot;</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">key</span>]
+          <span class="ruby-identifier">options</span>[<span class="ruby-identifier">key</span>] = <span class="ruby-identifier">size_to_xy</span>(<span class="ruby-identifier">options</span>[<span class="ruby-identifier">key</span>])
+        <span class="ruby-keyword kw">end</span>
+
+        <span class="ruby-comment cmt"># width and height must not be zero</span>
+        <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:size</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">dimension</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-value str">&quot;:size must not be zero for X or Y&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">dimension</span>.<span class="ruby-identifier">zero?</span>
+        <span class="ruby-keyword kw">end</span>
+
+        <span class="ruby-comment cmt"># crop</span>
+        <span class="ruby-ivar">@image</span>.<span class="ruby-identifier">crop!</span>(<span class="ruby-identifier">options</span>[<span class="ruby-identifier">:from</span>][<span class="ruby-value">0</span>], <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:from</span>][<span class="ruby-value">1</span>], <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:size</span>][<span class="ruby-value">0</span>], <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:size</span>][<span class="ruby-value">1</span>], <span class="ruby-keyword kw">true</span>)
+      <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

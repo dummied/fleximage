@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>dsl_accessor (Class)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/dsl_accessor.rb, line 4</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">dsl_accessor</span>(<span class="ruby-identifier">name</span>, <span class="ruby-identifier">options</span> = {})
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">TypeError</span>, <span class="ruby-node">&quot;DSL Error: options should be a hash. but got `#{options.class}'&quot;</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>)
+    <span class="ruby-identifier">writer</span> = <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:writer</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:setter</span>]
+    <span class="ruby-identifier">writer</span> =
+      <span class="ruby-keyword kw">case</span> <span class="ruby-identifier">writer</span>
+      <span class="ruby-keyword kw">when</span> <span class="ruby-constant">NilClass</span> <span class="ruby-keyword kw">then</span> <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-identifier">value</span>}
+      <span class="ruby-keyword kw">when</span> <span class="ruby-constant">Symbol</span>   <span class="ruby-keyword kw">then</span> <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-identifier">__send__</span>(<span class="ruby-identifier">writer</span>, <span class="ruby-identifier">value</span>)}
+      <span class="ruby-keyword kw">when</span> <span class="ruby-constant">Proc</span>     <span class="ruby-keyword kw">then</span> <span class="ruby-identifier">writer</span>
+      <span class="ruby-keyword kw">else</span> <span class="ruby-identifier">raise</span> <span class="ruby-constant">TypeError</span>, <span class="ruby-node">&quot;DSL Error: writer should be a symbol or proc. but got `#{options[:writer].class}'&quot;</span>
+      <span class="ruby-keyword kw">end</span>
+    <span class="ruby-identifier">write_inheritable_attribute</span>(<span class="ruby-node">&quot;#{name}_writer&quot;</span><span class="ruby-node">&quot;#{name}_writer&quot;</span>, <span class="ruby-identifier">writer</span>)
+
+    <span class="ruby-identifier">default</span> =
+      <span class="ruby-keyword kw">case</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:default</span>]
+      <span class="ruby-keyword kw">when</span> <span class="ruby-constant">NilClass</span> <span class="ruby-keyword kw">then</span> <span class="ruby-keyword kw">nil</span>
+      <span class="ruby-keyword kw">when</span> []       <span class="ruby-keyword kw">then</span> <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span>{[]}
+      <span class="ruby-keyword kw">when</span> {}       <span class="ruby-keyword kw">then</span> <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span>{{}}
+      <span class="ruby-keyword kw">when</span> <span class="ruby-constant">Symbol</span>   <span class="ruby-keyword kw">then</span> <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span>{<span class="ruby-identifier">__send__</span>(<span class="ruby-identifier">options</span>[<span class="ruby-identifier">:default</span>])}
+      <span class="ruby-keyword kw">when</span> <span class="ruby-constant">Proc</span>     <span class="ruby-keyword kw">then</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:default</span>]
+      <span class="ruby-keyword kw">else</span> <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span>{<span class="ruby-identifier">options</span>[<span class="ruby-identifier">:default</span>]}
+      <span class="ruby-keyword kw">end</span>
+    <span class="ruby-identifier">write_inheritable_attribute</span>(<span class="ruby-node">&quot;#{name}_default&quot;</span><span class="ruby-node">&quot;#{name}_default&quot;</span>, <span class="ruby-identifier">default</span>)
+
+    <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">class_eval</span> <span class="ruby-keyword kw">do</span>
+      <span class="ruby-identifier">define_method</span>(<span class="ruby-node">&quot;#{name}=&quot;</span>) <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">value</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">writer</span> = <span class="ruby-identifier">read_inheritable_attribute</span>(<span class="ruby-node">&quot;#{name}_writer&quot;</span><span class="ruby-node">&quot;#{name}_writer&quot;</span>)
+        <span class="ruby-identifier">value</span>  = <span class="ruby-identifier">writer</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">value</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">writer</span>
+        <span class="ruby-identifier">write_inheritable_attribute</span>(<span class="ruby-node">&quot;#{name}&quot;</span><span class="ruby-node">&quot;#{name}&quot;</span>, <span class="ruby-identifier">value</span>)
+      <span class="ruby-keyword kw">end</span>
+
+      <span class="ruby-identifier">define_method</span>(<span class="ruby-identifier">name</span>) <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-operator">*</span><span class="ruby-identifier">values</span><span class="ruby-operator">|</span>
+        <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">values</span>.<span class="ruby-identifier">empty?</span>
+          <span class="ruby-comment cmt"># getter method</span>
+          <span class="ruby-identifier">key</span> = <span class="ruby-node">&quot;#{name}&quot;</span><span class="ruby-node">&quot;#{name}&quot;</span>
+          <span class="ruby-keyword kw">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">inheritable_attributes</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">key</span>)
+            <span class="ruby-identifier">default</span> = <span class="ruby-identifier">read_inheritable_attribute</span>(<span class="ruby-node">&quot;#{name}_default&quot;</span><span class="ruby-node">&quot;#{name}_default&quot;</span>)
+            <span class="ruby-identifier">value</span>   = <span class="ruby-identifier">default</span> <span class="ruby-value">? </span><span class="ruby-identifier">default</span>.<span class="ruby-identifier">call</span>(<span class="ruby-keyword kw">self</span>) <span class="ruby-operator">:</span> <span class="ruby-keyword kw">nil</span>
+            <span class="ruby-identifier">__send__</span>(<span class="ruby-node">&quot;#{name}=&quot;</span>, <span class="ruby-identifier">value</span>)
+          <span class="ruby-keyword kw">end</span>
+          <span class="ruby-identifier">read_inheritable_attribute</span>(<span class="ruby-identifier">key</span>)
+        <span class="ruby-keyword kw">else</span>
+          <span class="ruby-comment cmt"># setter method</span>
+          <span class="ruby-identifier">__send__</span>(<span class="ruby-node">&quot;#{name}=&quot;</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">values</span>)
+        <span class="ruby-keyword kw">end</span>
+      <span class="ruby-keyword kw">end</span>
+    <span class="ruby-keyword kw">end</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

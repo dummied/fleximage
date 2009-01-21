@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>directory_path (Fleximage::Model::InstanceMethods)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/fleximage/model.rb, line 218</span>
+      <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">directory_path</span>(<span class="ruby-identifier">with_url</span>=<span class="ruby-keyword kw">true</span>)
+        <span class="ruby-identifier">raise</span> <span class="ruby-value str">'No image directory was defined, cannot generate path'</span> <span class="ruby-keyword kw">unless</span> (<span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">image_directory</span> <span class="ruby-operator">||</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">s3_store?</span>)
+        
+        <span class="ruby-comment cmt"># base directory  </span>
+        <span class="ruby-keyword kw">if</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">s3_store?</span>
+          <span class="ruby-identifier">base_path</span> = <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">image_directory</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-value">? </span><span class="ruby-value str">&quot;&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">image_directory</span>
+          <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">with_url</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">base_path</span>.<span class="ruby-identifier">blank?</span>
+            <span class="ruby-identifier">directory</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">protocol</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">hostname</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">port_string</span>, <span class="ruby-identifier">bucket_name</span>) 
+          <span class="ruby-keyword kw">elsif</span> <span class="ruby-identifier">with_url</span>
+            <span class="ruby-identifier">directory</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">protocol</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">hostname</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">port_string</span>, <span class="ruby-identifier">bucket_name</span>, <span class="ruby-identifier">base_path</span>) 
+          <span class="ruby-keyword kw">else</span>
+            <span class="ruby-identifier">directory</span> = <span class="ruby-identifier">base_path</span>
+          <span class="ruby-keyword kw">end</span> 
+        <span class="ruby-keyword kw">else</span>   
+          <span class="ruby-identifier">directory</span> = <span class="ruby-node">&quot;#{RAILS_ROOT}/#{self.class.image_directory}&quot;</span>
+        <span class="ruby-keyword kw">end</span>
+        
+        <span class="ruby-comment cmt"># specific creation date based directory suffix.</span>
+        <span class="ruby-identifier">creation</span> = <span class="ruby-keyword kw">self</span>[<span class="ruby-identifier">:created_at</span>] <span class="ruby-operator">||</span> <span class="ruby-keyword kw">self</span>[<span class="ruby-identifier">:created_on</span>]
+        <span class="ruby-keyword kw">if</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">use_creation_date_based_directories</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">creation</span> 
+          <span class="ruby-node">&quot;#{directory}/#{creation.year}/#{creation.month}/#{creation.day}&quot;</span>
+        <span class="ruby-keyword kw">else</span>
+          <span class="ruby-identifier">directory</span>
+        <span class="ruby-keyword kw">end</span>
+      <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

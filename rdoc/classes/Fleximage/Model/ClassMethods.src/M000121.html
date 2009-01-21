@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>acts_as_fleximage (Fleximage::Model::ClassMethods)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/fleximage/model.rb, line 86</span>
+      <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">acts_as_fleximage</span>(<span class="ruby-identifier">options</span> = {})
+        
+        <span class="ruby-comment cmt"># Include the necesary instance methods</span>
+        <span class="ruby-identifier">include</span> <span class="ruby-constant">Fleximage</span><span class="ruby-operator">::</span><span class="ruby-constant">Model</span><span class="ruby-operator">::</span><span class="ruby-constant">InstanceMethods</span>
+        
+        <span class="ruby-comment cmt"># Call this class method just like you would call +operate+ in a view.</span>
+        <span class="ruby-comment cmt"># The image transoformation in the provided block will be run on every uploaded image before its saved as the </span>
+        <span class="ruby-comment cmt"># master image.</span>
+        <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">preprocess_image</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+          <span class="ruby-identifier">preprocess_image_operation</span>(<span class="ruby-identifier">block</span>)
+        <span class="ruby-keyword kw">end</span>
+        
+        <span class="ruby-comment cmt"># Internal method to ask this class if it stores image in the DB.</span>
+        <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">db_store?</span>
+          <span class="ruby-identifier">columns</span>.<span class="ruby-identifier">find</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">col</span><span class="ruby-operator">|</span>
+            <span class="ruby-identifier">col</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">==</span> <span class="ruby-value str">'image_file_data'</span>
+          <span class="ruby-keyword kw">end</span>
+        <span class="ruby-keyword kw">end</span>
+         
+        <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">s3_store?</span>
+          <span class="ruby-identifier">s3</span>
+        <span class="ruby-keyword kw">end</span>
+        
+        <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">has_store?</span>
+          <span class="ruby-identifier">db_store?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">image_directory</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">s3_store?</span>
+        <span class="ruby-keyword kw">end</span>
+        
+        <span class="ruby-comment cmt"># validation callback</span>
+        <span class="ruby-identifier">validate</span> <span class="ruby-identifier">:validate_image</span>
+        
+        <span class="ruby-comment cmt"># The filename of the temp image.  Used for storing of good images when validation fails</span>
+        <span class="ruby-comment cmt"># and the form needs to be redisplayed.</span>
+        <span class="ruby-identifier">attr_reader</span> <span class="ruby-identifier">:image_file_temp</span>
+        
+        <span class="ruby-comment cmt"># Setter for jpg compression quality at the instance level</span>
+        <span class="ruby-identifier">attr_accessor</span> <span class="ruby-identifier">:jpg_compression_quality</span>
+        
+        <span class="ruby-comment cmt"># Where images get stored</span>
+        <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:image_directory</span>  
+        
+        <span class="ruby-comment cmt"># Are we using Amazon s3?</span>
+        <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:s3</span>
+        
+        <span class="ruby-comment cmt"># Put uploads from different days into different subdirectories</span>
+        <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:use_creation_date_based_directories</span>, <span class="ruby-identifier">:default</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword kw">true</span>
+        
+        <span class="ruby-comment cmt"># The format are master images are stored in</span>
+        <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:image_storage_format</span>, <span class="ruby-identifier">:default</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span> { <span class="ruby-identifier">:png</span> }
+        
+        <span class="ruby-comment cmt"># Require a valid image.  Defaults to true.  Set to false if its ok to have no image for</span>
+        <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:require_image</span>, <span class="ruby-identifier">:default</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword kw">true</span>
+        
+        <span class="ruby-comment cmt"># Missing image message</span>
+        <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:missing_image_message</span>, <span class="ruby-identifier">:default</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value str">'is required'</span>
+        
+        <span class="ruby-comment cmt"># Invalid image message</span>
+        <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:invalid_image_message</span>, <span class="ruby-identifier">:default</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value str">'was not a readable image'</span>
+        
+        <span class="ruby-comment cmt"># Sets the quality of rendered JPGs</span>
+        <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:output_image_jpg_quality</span>, <span class="ruby-identifier">:default</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">85</span>
+        
+        <span class="ruby-comment cmt"># Set a default image to use when no image has been assigned to this record</span>
+        <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:default_image_path</span>
+        
+        <span class="ruby-comment cmt"># Set a default image based on a a size and fill</span>
+        <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:default_image</span>
+        
+        <span class="ruby-comment cmt"># A block that processes an image before it gets saved as the master image of a record.</span>
+        <span class="ruby-comment cmt"># Can be helpful to resize potentially huge images to something more manageable. Set via</span>
+        <span class="ruby-comment cmt"># the &quot;preprocess_image { |image| ... }&quot; class method.</span>
+        <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:preprocess_image_operation</span>   
+        
+        
+        
+        <span class="ruby-comment cmt"># Image related save and destroy callbacks</span>
+        <span class="ruby-identifier">after_destroy</span> <span class="ruby-identifier">:delete_image_file</span>
+        <span class="ruby-identifier">before_save</span>   <span class="ruby-identifier">:pre_save</span>
+        <span class="ruby-identifier">after_save</span>    <span class="ruby-identifier">:post_save</span>
+        
+        <span class="ruby-comment cmt"># execute configuration block</span>
+        <span class="ruby-keyword kw">yield</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">block_given?</span>
+        
+        <span class="ruby-comment cmt"># set the image directory from passed options</span>
+        <span class="ruby-identifier">image_directory</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:image_directory</span>] <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:image_directory</span>]  
+        
+        <span class="ruby-identifier">s3</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:s3</span>] <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:s3</span>]  
+        
+        <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">s3_options</span>
+          <span class="ruby-keyword kw">begin</span>
+            <span class="ruby-ivar">@@s3_config_path</span> = <span class="ruby-constant">RAILS_ROOT</span> <span class="ruby-operator">+</span> <span class="ruby-value str">'/config/amazon_s3.yml'</span>
+            <span class="ruby-ivar">@@s3_config</span> = <span class="ruby-ivar">@@s3_config</span> = <span class="ruby-constant">YAML</span>.<span class="ruby-identifier">load</span>(<span class="ruby-constant">ERB</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-ivar">@@s3_config_path</span>)).<span class="ruby-identifier">result</span>)[<span class="ruby-constant">RAILS_ENV</span>].<span class="ruby-identifier">symbolize_keys</span>
+          <span class="ruby-keyword kw">rescue</span>
+           <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigFileNotFoundError</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value str">'File %s not found'</span> <span class="ruby-operator">%</span> <span class="ruby-ivar">@@s3_config_path</span>)  
+          <span class="ruby-keyword kw">end</span>
+        <span class="ruby-keyword kw">end</span>
+        
+        <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">s3</span>
+          <span class="ruby-keyword kw">begin</span>
+            <span class="ruby-identifier">require</span> <span class="ruby-value str">'aws/s3'</span>
+            <span class="ruby-identifier">include</span> <span class="ruby-constant">AWS</span><span class="ruby-operator">::</span><span class="ruby-constant">S3</span>
+          <span class="ruby-keyword kw">rescue</span> <span class="ruby-constant">LoadError</span>
+            <span class="ruby-identifier">raise</span> <span class="ruby-constant">RequiredLibraryNotFoundError</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value str">'AWS::S3 could not be loaded'</span>)
+          <span class="ruby-keyword kw">end</span>  
+          
+          <span class="ruby-constant">AWS</span><span class="ruby-operator">::</span><span class="ruby-constant">S3</span><span class="ruby-operator">::</span><span class="ruby-constant">Base</span>.<span class="ruby-identifier">establish_connection!</span>(<span class="ruby-identifier">s3_options</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-identifier">:access_key_id</span>, <span class="ruby-identifier">:secret_access_key</span>, <span class="ruby-identifier">:server</span>, <span class="ruby-identifier">:port</span>, <span class="ruby-identifier">:use_ssl</span>, <span class="ruby-identifier">:persistent</span>, <span class="ruby-identifier">:proxy</span>))
+                    
+        <span class="ruby-keyword kw">end</span>
+        
+        <span class="ruby-comment cmt"># Require the declaration of a master image storage directory</span>
+        <span class="ruby-keyword kw">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">image_directory</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">db_store?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">default_image</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">default_image_path</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">s3</span>
+          <span class="ruby-identifier">raise</span> <span class="ruby-value str">&quot;No place to put images!  Declare this via the :image_directory =&gt; 'path/to/directory' option\n&quot;</span><span class="ruby-operator">+</span>
+                <span class="ruby-value str">&quot;Or add a database column named image_file_data for DB storage\n&quot;</span><span class="ruby-operator">+</span>
+                <span class="ruby-value str">&quot;Or fill out config/amazon_s3 and declare via :s3 =&gt; true&quot;</span>
+        <span class="ruby-keyword kw">end</span>
+      <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

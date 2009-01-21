@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>test_should_save_data_in_magic_columns_from_url (FleximageMagicColumnsTest)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File test/unit/magic_columns_test.rb, line 11</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">test_should_save_data_in_magic_columns_from_url</span>
+    <span class="ruby-identifier">p</span> = <span class="ruby-constant">PhotoFile</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">:image_file_url</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">files</span>(<span class="ruby-identifier">:web_photo</span>))
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-identifier">files</span>(<span class="ruby-identifier">:web_photo</span>), <span class="ruby-identifier">p</span>.<span class="ruby-identifier">image_filename</span>
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-value">110</span>,   <span class="ruby-identifier">p</span>.<span class="ruby-identifier">image_height</span>
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-value">276</span>,   <span class="ruby-identifier">p</span>.<span class="ruby-identifier">image_width</span>
+  <span class="ruby-keyword kw">rescue</span> <span class="ruby-constant">SocketError</span>
+    <span class="ruby-identifier">print</span> <span class="ruby-value str">'!'</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

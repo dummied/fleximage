@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>test_should_scale_the_main_image_and_keep_its_aspect_ratio (FleximageOperatorBaseTest)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File test/unit/operator_base_test.rb, line 41</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">test_should_scale_the_main_image_and_keep_its_aspect_ratio</span>
+    <span class="ruby-identifier">img</span> = <span class="ruby-ivar">@op</span>.<span class="ruby-identifier">scale</span>(<span class="ruby-value">400</span>)
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-value">400</span>, <span class="ruby-identifier">img</span>.<span class="ruby-identifier">rows</span>
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-value">300</span>, <span class="ruby-identifier">img</span>.<span class="ruby-identifier">columns</span>
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-value">400</span>, <span class="ruby-ivar">@photo</span>.<span class="ruby-identifier">load_image</span>.<span class="ruby-identifier">rows</span>
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-value">300</span>, <span class="ruby-ivar">@photo</span>.<span class="ruby-identifier">load_image</span>.<span class="ruby-identifier">columns</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

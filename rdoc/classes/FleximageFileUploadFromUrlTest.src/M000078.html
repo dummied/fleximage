@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>test_should_be_invalid_with_invalid_url (FleximageFileUploadFromUrlTest)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File test/unit/file_upload_from_url_test.rb, line 20</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">test_should_be_invalid_with_invalid_url</span>
+    <span class="ruby-identifier">p</span> = <span class="ruby-constant">PhotoBare</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">:image_file_url</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value str">'foo'</span>)
+    <span class="ruby-identifier">assert</span> <span class="ruby-operator">!</span><span class="ruby-identifier">p</span>.<span class="ruby-identifier">save</span>, <span class="ruby-value str">'Record expected to be invalid after upload via URL'</span>
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-value">1</span>, <span class="ruby-identifier">p</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">size</span>
+    <span class="ruby-identifier">assert_equal</span> <span class="ruby-value str">'was not a readable image'</span>, <span class="ruby-identifier">p</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">on</span>(<span class="ruby-identifier">:image_file_url</span>)
+  <span class="ruby-keyword kw">rescue</span> <span class="ruby-constant">SocketError</span>
+    <span class="ruby-identifier">print</span> <span class="ruby-value str">'!'</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>
