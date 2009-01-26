@@ -143,7 +143,7 @@ module Fleximage
         
         # Sets the quality of rendered JPGs
         dsl_accessor :output_image_jpg_quality, :default => 85
-        
+     
         # Set a default image to use when no image has been assigned to this record
         dsl_accessor :default_image_path
         
@@ -153,9 +153,8 @@ module Fleximage
         # A block that processes an image before it gets saved as the master image of a record.
         # Can be helpful to resize potentially huge images to something more manageable. Set via
         # the "preprocess_image { |image| ... }" class method.
-        dsl_accessor :preprocess_image_operation   
-        
-        
+
+        dsl_accessor :preprocess_image_operation
         
         # Image related save and destroy callbacks
         after_destroy :delete_image_file

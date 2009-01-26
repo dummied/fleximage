@@ -76,7 +76,7 @@
       <p>
 Provides class methods for <a href="../../Fleximage.html">Fleximage</a> for
 use in model classes. The only class method is <a
-href="ClassMethods.html#M000121">acts_as_fleximage</a> which integrates <a
+href="ClassMethods.html#M000001">acts_as_fleximage</a> which integrates <a
 href="../../Fleximage.html">Fleximage</a> functionality into a model class.
 </p>
 <p>
@@ -85,14 +85,6 @@ The following class level accessors also get inserted.
 <ul>
 <li><tt>image_directory</tt>: (String, no default) Where the master images are
 stored, directory path relative to your app root.
-
-</li>
-<li>+s3+: (Boolean, default <tt>false</tt>) If set to true, you&#8216;ll need
-to copy amazon_s3_sample.yml to your config directory, rename to
-amazon_s3.yml and fill in with your s3 connection details for each
-environment. At that point, your master images will be saved to
-Amazon&#8216;s S3 service. Later rendered images should still be handled
-with the <a href="../../Rails.html">Rails</a> page cache system, however.
 
 </li>
 <li><tt>use_creation_date_based_directories</tt>: (Boolean, default
@@ -136,15 +128,7 @@ for this record, the image at this path will be used instead. Useful for a
 placeholder graphic for new content that may not have an image just yet.
 
 </li>
-<li><tt>default_image</tt>: A hash which defines an empty starting image. This
-hash look like: <tt>:size =&gt; &#8216;123x456&#8217;, :color =&gt;
-:transparent</tt>, where <tt>:size</tt> defines the dimensions of the
-default image, and <tt>:color</tt> defines the fill. <tt>:color</tt> can be
-a named color as a string (&#8216;red&#8217;), :transparent, or a
-Magick::Pixel object.
-
-</li>
-<li><tt><a href="ClassMethods.html#M000122">preprocess_image</a></tt>: (Block,
+<li><tt><a href="ClassMethods.html#M000002">preprocess_image</a></tt>: (Block,
 no default) Call this class method just like you would call
 <tt>operate</tt> in a view. The image transoformation in the provided block
 will be run on every uploaded image before its saved as the master image.
@@ -162,8 +146,8 @@ Example:
       image_storage_format      :png
       require_image             true
       missing_image_message     'is required'
-      invalid_image_message     'was not a readable image'     #       default_image_path        'public/images/no_photo_yet.png'
-      default_image             nil
+      invalid_image_message     'was not a readable image'
+      default_image_path        'public/images/no_photo_yet.png'
       output_image_jpg_quality  85
 
       preprocess_image do |image|
@@ -184,12 +168,9 @@ Example:
       <h3 class="section-bar">Methods</h3>
 
       <div class="name-list">
-      <a href="#M000121">acts_as_fleximage</a>&nbsp;&nbsp;
-      <a href="#M000123">db_store?</a>&nbsp;&nbsp;
-      <a href="#M000125">has_store?</a>&nbsp;&nbsp;
-      <a href="#M000122">preprocess_image</a>&nbsp;&nbsp;
-      <a href="#M000126">s3_options</a>&nbsp;&nbsp;
-      <a href="#M000124">s3_store?</a>&nbsp;&nbsp;
+      <a href="#M000001">acts_as_fleximage</a>&nbsp;&nbsp;
+      <a href="#M000003">db_store?</a>&nbsp;&nbsp;
+      <a href="#M000002">preprocess_image</a>&nbsp;&nbsp;
       </div>
     </div>
 
@@ -202,7 +183,6 @@ Example:
 
       <div id="includes-list">
         <span class="include-name"><a href="InstanceMethods.html">Fleximage::Model::InstanceMethods</a></span>
-        <span class="include-name">AWS::S3</span>
       </div>
     </div>
 
@@ -219,12 +199,11 @@ Example:
     <div id="methods">
       <h3 class="section-bar">Public Class methods</h3>
 
-      <div id="method-M000123" class="method-detail">
-        <a name="M000123"></a>
+      <div id="method-M000003" class="method-detail">
+        <a name="M000003"></a>
 
         <div class="method-heading">
-          <a href="ClassMethods.src/M000123.html" target="Code" class="method-signature"
-            onclick="popupCode('ClassMethods.src/M000123.html');return false;">
+          <a href="#M000003" class="method-signature">
           <span class="method-name">db_store?</span><span class="method-args">()</span>
           </a>
         </div>
@@ -233,29 +212,26 @@ Example:
           <p>
 Internal method to ask this class if it stores image in the DB.
 </p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000003-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000003-source">
+<pre>
+    <span class="ruby-comment cmt"># File lib/fleximage/model.rb, line 85</span>
+85:           <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">db_store?</span>
+86:             <span class="ruby-identifier">columns</span>.<span class="ruby-identifier">find</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">col</span><span class="ruby-operator">|</span>
+87:               <span class="ruby-identifier">col</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">==</span> <span class="ruby-value str">'image_file_data'</span>
+88:             <span class="ruby-keyword kw">end</span>
+89:           <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
         </div>
       </div>
 
-      <div id="method-M000125" class="method-detail">
-        <a name="M000125"></a>
+      <div id="method-M000002" class="method-detail">
+        <a name="M000002"></a>
 
         <div class="method-heading">
-          <a href="ClassMethods.src/M000125.html" target="Code" class="method-signature"
-            onclick="popupCode('ClassMethods.src/M000125.html');return false;">
-          <span class="method-name">has_store?</span><span class="method-args">()</span>
-          </a>
-        </div>
-      
-        <div class="method-description">
-        </div>
-      </div>
-
-      <div id="method-M000122" class="method-detail">
-        <a name="M000122"></a>
-
-        <div class="method-heading">
-          <a href="ClassMethods.src/M000122.html" target="Code" class="method-signature"
-            onclick="popupCode('ClassMethods.src/M000122.html');return false;">
+          <a href="#M000002" class="method-signature">
           <span class="method-name">preprocess_image</span><span class="method-args">(&amp;block)</span>
           </a>
         </div>
@@ -266,31 +242,26 @@ Call this class method just like you would call <tt>operate</tt> in a view.
 The image transoformation in the provided block will be run on every
 uploaded image before its saved as the master image.
 </p>
-        </div>
-      </div>
-
-      <div id="method-M000124" class="method-detail">
-        <a name="M000124"></a>
-
-        <div class="method-heading">
-          <a href="ClassMethods.src/M000124.html" target="Code" class="method-signature"
-            onclick="popupCode('ClassMethods.src/M000124.html');return false;">
-          <span class="method-name">s3_store?</span><span class="method-args">()</span>
-          </a>
-        </div>
-      
-        <div class="method-description">
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000002-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000002-source">
+<pre>
+    <span class="ruby-comment cmt"># File lib/fleximage/model.rb, line 80</span>
+80:           <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">preprocess_image</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+81:             <span class="ruby-identifier">preprocess_image_operation</span>(<span class="ruby-identifier">block</span>)
+82:           <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
         </div>
       </div>
 
       <h3 class="section-bar">Public Instance methods</h3>
 
-      <div id="method-M000121" class="method-detail">
-        <a name="M000121"></a>
+      <div id="method-M000001" class="method-detail">
+        <a name="M000001"></a>
 
         <div class="method-heading">
-          <a href="ClassMethods.src/M000121.html" target="Code" class="method-signature"
-            onclick="popupCode('ClassMethods.src/M000121.html');return false;">
+          <a href="#M000001" class="method-signature">
           <span class="method-name">acts_as_fleximage</span><span class="method-args">(options = {}) {|if block_given?| ...}</span>
           </a>
         </div>
@@ -303,20 +274,80 @@ required key, :<tt>image_directory</tt>. This key should point to the
 directory you want your images stored on your server. Or configure with a
 nice looking block.
 </p>
-        </div>
-      </div>
-
-      <div id="method-M000126" class="method-detail">
-        <a name="M000126"></a>
-
-        <div class="method-heading">
-          <a href="ClassMethods.src/M000126.html" target="Code" class="method-signature"
-            onclick="popupCode('ClassMethods.src/M000126.html');return false;">
-          <span class="method-name">s3_options</span><span class="method-args">()</span>
-          </a>
-        </div>
-      
-        <div class="method-description">
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000001-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000001-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/fleximage/model.rb, line 71</span>
+ 71:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">acts_as_fleximage</span>(<span class="ruby-identifier">options</span> = {})
+ 72:         
+ 73:         <span class="ruby-comment cmt"># Insert class methods</span>
+ 74:         <span class="ruby-identifier">class_eval</span> <span class="ruby-keyword kw">do</span>
+ 75:           <span class="ruby-identifier">include</span> <span class="ruby-constant">Fleximage</span><span class="ruby-operator">::</span><span class="ruby-constant">Model</span><span class="ruby-operator">::</span><span class="ruby-constant">InstanceMethods</span>
+ 76:           
+ 77:           <span class="ruby-comment cmt"># Call this class method just like you would call +operate+ in a view.</span>
+ 78:           <span class="ruby-comment cmt"># The image transoformation in the provided block will be run on every uploaded image before its saved as the </span>
+ 79:           <span class="ruby-comment cmt"># master image.</span>
+ 80:           <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">preprocess_image</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+ 81:             <span class="ruby-identifier">preprocess_image_operation</span>(<span class="ruby-identifier">block</span>)
+ 82:           <span class="ruby-keyword kw">end</span>
+ 83:           
+ 84:           <span class="ruby-comment cmt"># Internal method to ask this class if it stores image in the DB.</span>
+ 85:           <span class="ruby-keyword kw">def</span> <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">db_store?</span>
+ 86:             <span class="ruby-identifier">columns</span>.<span class="ruby-identifier">find</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">col</span><span class="ruby-operator">|</span>
+ 87:               <span class="ruby-identifier">col</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">==</span> <span class="ruby-value str">'image_file_data'</span>
+ 88:             <span class="ruby-keyword kw">end</span>
+ 89:           <span class="ruby-keyword kw">end</span>
+ 90:         <span class="ruby-keyword kw">end</span>
+ 91:         
+ 92:         <span class="ruby-comment cmt"># Where images get stored</span>
+ 93:         <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:image_directory</span>
+ 94:         
+ 95:         <span class="ruby-comment cmt"># Put uploads from different days into different subdirectories</span>
+ 96:         <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:use_creation_date_based_directories</span>, <span class="ruby-identifier">:default</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword kw">true</span>
+ 97:         
+ 98:         <span class="ruby-comment cmt"># The format are master images are stored in</span>
+ 99:         <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:image_storage_format</span>, <span class="ruby-identifier">:default</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span> { <span class="ruby-identifier">:png</span> }
+100:         
+101:         <span class="ruby-comment cmt"># Require a valid image.  Defaults to true.  Set to false if its ok to have no image for</span>
+102:         <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:require_image</span>, <span class="ruby-identifier">:default</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword kw">true</span>
+103:         
+104:         <span class="ruby-comment cmt"># Missing image message</span>
+105:         <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:missing_image_message</span>, <span class="ruby-identifier">:default</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value str">'is required'</span>
+106:         
+107:         <span class="ruby-comment cmt"># Invalid image message</span>
+108:         <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:invalid_image_message</span>, <span class="ruby-identifier">:default</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value str">'was not a readable image'</span>
+109:         
+110:         <span class="ruby-comment cmt"># Sets the quality of rendered JPGs</span>
+111:         <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:output_image_jpg_quality</span>, <span class="ruby-identifier">:default</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">85</span>
+112:         
+113:         <span class="ruby-comment cmt"># Set a default image to use when no image has been assigned to this record</span>
+114:         <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:default_image_path</span>
+115:         
+116:         <span class="ruby-comment cmt"># A block that processes an image before it gets saved as the master image of a record.</span>
+117:         <span class="ruby-comment cmt"># Can be helpful to resize potentially huge images to something more manageable. Set via</span>
+118:         <span class="ruby-comment cmt"># the &quot;preprocess_image { |image| ... }&quot; class method.</span>
+119:         <span class="ruby-identifier">dsl_accessor</span> <span class="ruby-identifier">:preprocess_image_operation</span>
+120:         
+121:         <span class="ruby-comment cmt"># Image related save and destroy callbacks</span>
+122:         <span class="ruby-identifier">after_destroy</span> <span class="ruby-identifier">:delete_image_file</span>
+123:         <span class="ruby-identifier">before_save</span>   <span class="ruby-identifier">:pre_save</span>
+124:         <span class="ruby-identifier">after_save</span>    <span class="ruby-identifier">:post_save</span>
+125:         
+126:         <span class="ruby-comment cmt"># execute configuration block</span>
+127:         <span class="ruby-keyword kw">yield</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">block_given?</span>
+128:         
+129:         <span class="ruby-comment cmt"># set the image directory from passed options</span>
+130:         <span class="ruby-identifier">image_directory</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:image_directory</span>] <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-identifier">:image_directory</span>]
+131:         
+132:         <span class="ruby-comment cmt"># Require the declaration of a master image storage directory</span>
+133:         <span class="ruby-keyword kw">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">image_directory</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">db_store?</span>
+134:           <span class="ruby-identifier">raise</span> <span class="ruby-value str">&quot;No place to put images!  Declare this via the :image_directory =&gt; 'path/to/directory' option\n&quot;</span><span class="ruby-operator">+</span>
+135:                 <span class="ruby-value str">&quot;Or add a database column named image_file_data for DB storage&quot;</span>
+136:         <span class="ruby-keyword kw">end</span>
+137:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
         </div>
       </div>
 
