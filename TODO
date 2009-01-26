@@ -1,0 +1,4 @@
+* Allow the s3 connection details to be declared with the model instead of a yml file
+
+* Allow for authenticated S3 storage (right now, everything's going to public-read)
+

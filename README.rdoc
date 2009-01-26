@@ -235,7 +235,13 @@ Here are all the conversion tasks:
 * fleximage:convert:to_jpg : Converts all your stored master images from PNG format to JPG format.  This will compress your previously lossless master images.
 * fleximage:convert:to_png : Converts all your stored master images from JPG format to PNG format.
 
-After you run any of these tasks, make sure to update your model's class accessors +use_creation_date_based_directories+ and +image_storage_format+ to reflect the state of your image store.  Otherwise, the plugin will not find you master images for rendering.
+After you run any of these tasks, make sure to update your model's class accessors +use_creation_date_based_directories+ and +image_storage_format+ to reflect the state of your image store.  Otherwise, the plugin will not find you master images for rendering.    
+
+== Using Amazon S3 as your master image store
+
+To use Amazon's S3 service as the store for your master images, you'll need to copy the amazon_s3_sample.yml to your RAILS_ROOT/config directory, rename it to amazon_s3.yml and fill in your connection details.
+
+Then it's as simple as passing an +:s3 => true+ option in your acts_as_fleximage declaration on your model. 
 
 ------
 Copyright (c) 2008 Alex Wayne beautifulpixel.com, released under the MIT license.
