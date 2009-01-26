@@ -154,8 +154,8 @@ module Fleximage
         # Can be helpful to resize potentially huge images to something more manageable. Set via
         # the "preprocess_image { |image| ... }" class method.
 
-        dsl_accessor :preprocess_image_operation
-        
+        dsl_accessor :preprocess_image_operation   
+                
         # Image related save and destroy callbacks
         after_destroy :delete_image_file
         before_save   :pre_save
@@ -186,6 +186,8 @@ module Fleximage
             raise RequiredLibraryNotFoundError.new('AWS::S3 could not be loaded')
           end  
           
+          @@bucket_name = s3_options[:bucket_name]
+
           AWS::S3::Base.establish_connection!(s3_options.slice(:access_key_id, :secret_access_key, :server, :port, :use_ssl, :persistent, :proxy))
                     
         end
